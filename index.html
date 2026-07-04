@@ -41,6 +41,46 @@
       background-color: #0A0A0A;
       color: #F9FAFB;
       font-family: 'Barlow', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.theme-light {
+      background-color: #f5f5f5;
+      color: #111827;
+    }
+
+    body.theme-light .text-white { color: #111827 !important; }
+    body.theme-light .text-gray-400 { color: #4b5563 !important; }
+    body.theme-light .text-gray-500 { color: #6b7280 !important; }
+    body.theme-light .text-gray-600 { color: #4b5563 !important; }
+    body.theme-light .text-gray-300 { color: #374151 !important; }
+
+    body.theme-light .service-card,
+    body.theme-light .stat-badge,
+    body.theme-light #mobile-menu,
+    body.theme-light .form-input {
+      background: #ffffff !important;
+      border-color: #e5e7eb !important;
+      color: #111827 !important;
+    }
+
+    body.theme-light .form-input::placeholder { color: #6b7280; }
+
+    body.theme-light .grid-bg {
+      background-image:
+        linear-gradient(rgba(17,24,39,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(17,24,39,0.04) 1px, transparent 1px);
+    }
+
+    body.theme-light footer,
+    body.theme-light #contact {
+      background: #f0f0f0 !important;
+      border-color: #e5e7eb !important;
+    }
+
+    body.theme-light #navbar.scrolled {
+      background: rgba(255,255,255,0.97) !important;
+      box-shadow: 0 1px 0 #e5e7eb;
     }
 
     /* ── NOISE TEXTURE OVERLAY ── */
@@ -215,6 +255,10 @@
           </a>
         </li>
       </ul>
+
+      <button id="theme-toggle" class="hidden sm:flex items-center justify-center w-10 h-10 rounded-full text-white border transition hover:text-orange-400" style="border-color:#1F1F1F;background:#141414;" aria-label="Basculer le thème">
+        <i class="fa-solid fa-moon"></i>
+      </button>
 
       <!-- Hamburger -->
       <button id="menu-btn" class="md:hidden text-white text-xl focus:outline-none" aria-label="Menu">
@@ -576,7 +620,11 @@
       <div class="border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-600"
            style="border-color:#1F1F1F;">
         <span>© 2024 PMD Services. Tous droits réservés.</span>
-        <span>Conçu avec <i class="fa-solid fa-heart text-orange-400 mx-1"></i> pour vous servir</span>
+        <span>
+          Développé par <a href="https://moussadioufportfolio.kesug.com" target="_blank" rel="noopener noreferrer" class="text-orange-400 hover:text-white transition">Moussa Diouf</a>
+          <span class="mx-2">•</span>
+          <a href="https://moussadioufportfolio.kesug.com" target="_blank" rel="noopener noreferrer" class="hover:text-orange-400 transition">Visiter mon profil</a>
+        </span>
       </div>
     </div>
   </footer>
@@ -590,6 +638,26 @@
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ── Theme toggle ──
+    const themeToggle = document.getElementById('theme-toggle');
+    const applyTheme = (theme) => {
+      document.body.classList.toggle('theme-light', theme === 'light');
+      if (themeToggle) {
+        const icon = themeToggle.querySelector('i');
+        icon.className = theme === 'light' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+      }
+      localStorage.setItem('pmd-theme', theme);
+    };
+
+    const savedTheme = localStorage.getItem('pmd-theme');
+    const preferredTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    applyTheme(savedTheme || preferredTheme);
+
+    themeToggle?.addEventListener('click', () => {
+      const nextTheme = document.body.classList.contains('theme-light') ? 'dark' : 'light';
+      applyTheme(nextTheme);
     });
 
     // ── Mobile menu toggle ──
@@ -651,6 +719,14 @@
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Envoi en cours…';
 
       const formData = new FormData(form);
+      const nom = formData.get('nom')?.toString().trim() || 'Non renseigné';
+      const telephone = formData.get('telephone')?.toString().trim() || 'Non renseigné';
+      const service = formData.get('type_service')?.toString().trim() || 'Non renseigné';
+      const dateRdv = formData.get('date_rdv')?.toString().trim() || 'Non renseignée';
+      const message = formData.get('message')?.toString().trim() || 'Aucun message';
+
+      const whatsappMessage = `Bonjour PMD Services 👋\nNouvelle demande de rendez-vous :\nNom : ${nom}\nTéléphone : ${telephone}\nService : ${service}\nDate souhaitée : ${dateRdv}\nMessage : ${message}`;
+      const whatsappUrl = `https://wa.me/221782544938?text=${encodeURIComponent(whatsappMessage)}`;
 
       // ── 1. Send to PHP backend ──
       try {
@@ -661,23 +737,13 @@
         const phpData = await phpRes.json();
         if (!phpData.success) throw new Error(phpData.message || 'Erreur serveur');
       } catch (err) {
-        // If PHP fails, still try Formspree
         console.warn('PHP backend error:', err.message);
       }
 
-      // ── 2. Also send to Formspree (replace YOUR_FORMSPREE_ID) ──
-      const FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← REMPLACEZ ICI
-      try {
-        await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
-          method: 'POST',
-          body: formData,
-          headers: { 'Accept': 'application/json' }
-        });
-      } catch (err) {
-        console.warn('Formspree error:', err.message);
-      }
+      // ── 2. Open WhatsApp directly for the mechanic ──
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
 
-      showNotif('✅ Votre demande de rendez-vous a été envoyée ! Nous vous contacterons très bientôt.', true);
+      showNotif('✅ Votre demande de rendez-vous a été envoyée sur WhatsApp ! Nous vous contacterons très bientôt.', true);
       form.reset();
       btn.disabled = false;
       btn.innerHTML = '<i class="fa-regular fa-calendar-check mr-2"></i>CONFIRMER LE RENDEZ-VOUS';
