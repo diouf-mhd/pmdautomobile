@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atelier Couture — Créations Sénégalaises sur Mesure</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ivoire:   '#F7F0E6',
+            ivoireDark: '#EDE3D4',
+            or:       '#C9A96E',
+            orDeep:   '#A8844A',
+            encre:    '#1A1209',
+            taupe:    '#8C7B6B',
+          },
+          fontFamily: {
+            serif: ['Cormorant Garamond', 'serif'],
+            sans:  ['Jost', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background-color: #F7F0E6; color: #1A1209; font-family: 'Jost', sans-serif; overflow-x: hidden; }
+
+    /* TISSU TEXTURE */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(201,169,110,0.04) 3px, rgba(201,169,110,0.04) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(201,169,110,0.04) 3px, rgba(201,169,110,0.04) 4px);
+      pointer-events: none; z-index: 0;
+    }
+
+    #navbar { transition: all 0.4s ease; }
+    #navbar.scrolled { background: rgba(247,240,230,0.97) !important; box-shadow: 0 1px 0 rgba(201,169,110,0.25); }
+
+    .gold-ornament {
+      display: flex; align-items: center; gap: 12px;
+      color: #C9A96E; font-size: 0.62rem; letter-spacing: 0.28em; font-family: 'Jost', sans-serif;
+    }
+    .gold-ornament::before, .gold-ornament::after {
+      content: ''; flex: 1; height: 1px;
+    }
+    .gold-ornament::before { background: linear-gradient(to right, transparent, #C9A96E); }
+    .gold-ornament::after  { background: linear-gradient(to left, transparent, #C9A96E); }
+
+    .hero-bg {
+      background:
+        linear-gradient(to right, rgba(247,240,230,0.97) 48%, rgba(247,240,230,0.55) 100%),
+        url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80') right center/cover no-repeat;
+      min-height: 100vh;
+    }
+
+    .gallery-item { overflow: hidden; position: relative; }
+    .gallery-item img { transition: transform 0.6s ease; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item:hover img { transform: scale(1.07); }
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(26,18,9,0.75) 0%, transparent 55%);
+      opacity: 0; transition: opacity 0.4s;
+      display: flex; align-items: flex-end; padding: 18px;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .service-card { background: #fff; border: 1px solid rgba(201,169,110,0.2); transition: transform .3s, box-shadow .3s, border-color .3s; }
+    .service-card:hover { transform: translateY(-5px); border-color: rgba(201,169,110,0.55); box-shadow: 0 16px 48px rgba(201,169,110,0.13); }
+
+    .form-field { background: #fff; border: 1px solid rgba(201,169,110,0.25); color: #1A1209; font-family: 'Jost', sans-serif; transition: border-color .2s, box-shadow .2s; }
+    .form-field:focus { outline: none; border-color: #C9A96E; box-shadow: 0 0 0 3px rgba(201,169,110,0.12); }
+    .form-field::placeholder { color: #B5A898; }
+
+    .btn-or { background: linear-gradient(135deg,#C9A96E,#A8844A); color: #F7F0E6; font-family: 'Jost',sans-serif; font-weight: 500; letter-spacing: .12em; transition: opacity .2s, transform .2s, box-shadow .2s; }
+    .btn-or:hover { opacity: .9; transform: translateY(-2px); box-shadow: 0 10px 32px rgba(168,132,74,.32); }
+    .btn-outline { border: 1px solid #C9A96E; color: #A8844A; background: transparent; font-family: 'Jost',sans-serif; font-weight: 500; letter-spacing: .1em; transition: all .2s; }
+    .btn-outline:hover { background: #C9A96E; color: #F7F0E6; }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .wax-bg {
+      background-image:
+        radial-gradient(circle at 20% 30%, rgba(201,169,110,0.07) 0%, transparent 55%),
+        radial-gradient(circle at 80% 70%, rgba(201,169,110,0.05) 0%, transparent 55%);
+    }
+
+    /* MODAL */
+    #modal-mesures { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(26,18,9,0.6); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+    #modal-mesures.open { display: flex; }
+    .modal-box { background: #F7F0E6; border: 1px solid rgba(201,169,110,0.3); max-width: 580px; width: 95%; max-height: 92vh; overflow-y: auto; border-radius: 20px; padding: 32px; }
+
+    /* TAB BTN */
+    .tab-btn { transition: all .2s; border: 1px solid rgba(201,169,110,0.35); color: #A8844A; }
+    .tab-btn.active { background: #C9A96E; color: #F7F0E6; border-color: #C9A96E; }
+
+    /* MOBILE MENU */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: flex; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #EDE3D4; }
+    ::-webkit-scrollbar-thumb { background: #C9A96E; border-radius: 10px; }
+  </style>
+</head>
+
+<body class="relative">
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 py-5">
+  <div class="max-w-6xl mx-auto flex items-center justify-between">
+
+    <a href="#hero" class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-full flex items-center justify-center"
+           style="background:linear-gradient(135deg,#C9A96E,#A8844A);">
+        <i class="fa-solid fa-scissors text-xs" style="color:#F7F0E6"></i>
+      </div>
+      <div class="leading-none">
+        <div class="font-serif text-xl font-semibold tracking-wider" style="color:#1A1209">ATELIER</div>
+        <div class="text-xs tracking-[0.3em] font-sans uppercase" style="color:#C9A96E">COUTURE</div>
+      </div>
+    </a>
+
+    <ul class="hidden md:flex items-center gap-8 text-xs tracking-[0.18em] uppercase" style="color:#8C7B6B">
+      <li><a href="#collection" class="hover:text-encre transition-colors">Collection</a></li>
+      <li><a href="#services" class="hover:text-encre transition-colors">Services</a></li>
+      <li><a href="#rendez-vous" class="hover:text-encre transition-colors">Rendez-vous</a></li>
+      <li><a href="#contact" class="hover:text-encre transition-colors">Contact</a></li>
+      <li><a href="#rendez-vous" class="btn-or px-5 py-2.5 rounded-full text-xs">Prendre RDV</a></li>
+    </ul>
+
+    <button id="menu-btn" class="md:hidden text-lg" style="color:#1A1209">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+
+  <div id="mobile-menu" class="flex-col md:hidden mt-3 gap-3 px-4 py-5 rounded-2xl"
+       style="background:#fff;border:1px solid rgba(201,169,110,0.2);">
+    <a href="#collection" class="block text-sm tracking-wide py-2 px-3 rounded-lg hover:bg-ivoireDark transition" style="color:#8C7B6B">Collection</a>
+    <a href="#services"   class="block text-sm tracking-wide py-2 px-3 rounded-lg hover:bg-ivoireDark transition" style="color:#8C7B6B">Services</a>
+    <a href="#rendez-vous" class="block text-sm tracking-wide py-2 px-3 rounded-lg hover:bg-ivoireDark transition" style="color:#8C7B6B">Rendez-vous</a>
+    <a href="#contact"    class="block text-sm tracking-wide py-2 px-3 rounded-lg hover:bg-ivoireDark transition" style="color:#8C7B6B">Contact</a>
+    <a href="#rendez-vous" class="btn-or text-center py-3 rounded-xl block text-xs tracking-widest uppercase">Prendre RDV</a>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<section id="hero" class="hero-bg flex items-center pt-20 relative z-10">
+  <div class="max-w-6xl mx-auto px-6 py-24 w-full">
+
+    <div class="inline-block mb-6 px-4 py-2 rounded-full text-xs tracking-[.22em] uppercase reveal"
+         style="background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.3);color:#A8844A;">
+      ✦ CRÉATION SUR MESURE · DAKAR, SÉNÉGAL
+    </div>
+
+    <h1 class="font-serif text-6xl sm:text-7xl md:text-8xl leading-[1.05] mb-6 reveal" style="animation-delay:.1s">
+      L'élégance<br>
+      <em class="font-serif font-light" style="color:#C9A96E">sénégalaise</em><br>
+      sur mesure
+    </h1>
+
+    <p class="max-w-md text-sm leading-relaxed mb-10 font-light reveal" style="color:#8C7B6B;animation-delay:.2s">
+      Boubous, kaftans, tenues de baptême &amp; mariages. Chaque pièce naît de votre silhouette, de votre tissu, de votre histoire.
+    </p>
+
+    <div class="flex flex-wrap gap-4 reveal" style="animation-delay:.3s">
+      <a href="#rendez-vous" class="btn-or px-8 py-4 rounded-full text-xs tracking-widest uppercase">
+        <i class="fa-regular fa-calendar-check mr-2"></i>Prendre rendez-vous
+      </a>
+      <a href="#collection" class="btn-outline px-8 py-4 rounded-full text-xs tracking-widest uppercase">
+        Voir la collection
+      </a>
+    </div>
+
+    <div class="flex flex-wrap gap-6 mt-16 reveal" style="animation-delay:.4s">
+      <div class="text-center">
+        <div class="font-serif text-4xl font-light" style="color:#C9A96E">15+</div>
+        <div class="text-xs tracking-widest uppercase mt-1" style="color:#8C7B6B">Années d'art</div>
+      </div>
+      <div class="w-px opacity-30" style="background:#C9A96E;align-self:stretch"></div>
+      <div class="text-center">
+        <div class="font-serif text-4xl font-light" style="color:#C9A96E">800+</div>
+        <div class="text-xs tracking-widest uppercase mt-1" style="color:#8C7B6B">Clients habillés</div>
+      </div>
+      <div class="w-px opacity-30" style="background:#C9A96E;align-self:stretch"></div>
+      <div class="text-center">
+        <div class="font-serif text-4xl font-light" style="color:#C9A96E">100%</div>
+        <div class="text-xs tracking-widest uppercase mt-1" style="color:#8C7B6B">Sur mesure</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ COLLECTION ═══════════════════ -->
+<section id="collection" class="py-24 relative z-10 wax-bg">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-12 reveal">
+      <div class="gold-ornament mb-4">GALERIE DES CRÉATIONS</div>
+      <h2 class="font-serif text-5xl font-light mb-3">Nos Modèles</h2>
+      <p class="text-sm max-w-lg mx-auto leading-relaxed" style="color:#8C7B6B">
+        De la tenue de soirée au grand boubou de cérémonie — confectionnés avec passion et savoir-faire.
+      </p>
+    </div>
+
+    <!-- Filter buttons -->
+    <div class="flex flex-wrap justify-center gap-3 mb-10 reveal">
+      <button class="tab-btn text-xs tracking-widest uppercase px-5 py-2.5 rounded-full active"
+              onclick="filterGallery('all',this)">Tout</button>
+      <button class="tab-btn text-xs tracking-widest uppercase px-5 py-2.5 rounded-full"
+              onclick="filterGallery('boubou',this)">Boubous</button>
+      <button class="tab-btn text-xs tracking-widest uppercase px-5 py-2.5 rounded-full"
+              onclick="filterGallery('kaftan',this)">Kaftan</button>
+      <button class="tab-btn text-xs tracking-widest uppercase px-5 py-2.5 rounded-full"
+              onclick="filterGallery('ceremonie',this)">Cérémonies</button>
+      <button class="tab-btn text-xs tracking-widest uppercase px-5 py-2.5 rounded-full"
+              onclick="filterGallery('moderne',this)">Moderne</button>
+    </div>
+
+    <div id="gallery-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 reveal">
+
+      <div class="gallery-item rounded-2xl" data-cat="boubou" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1596460107916-430662021049?w=400&q=80" alt="Grand Boubou brodé" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Grand Boubou Brodé</div><div class="text-xs tracking-wider" style="color:#B5A898">Bazin riche</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="kaftan" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1590086782957-93c06ef21604?w=400&q=80" alt="Kaftan élégant" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Kaftan Élégant</div><div class="text-xs tracking-wider" style="color:#B5A898">Dentelle · Soirée</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="ceremonie" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=400&q=80" alt="Tenue de mariage" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Tenue de Mariage</div><div class="text-xs tracking-wider" style="color:#B5A898">Wax &amp; Broderie</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="moderne" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1534126511673-b6899657816a?w=400&q=80" alt="Mode africaine moderne" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Fusion Moderne</div><div class="text-xs tracking-wider" style="color:#B5A898">Wax contemporain</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="boubou" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=400&q=80" alt="Boubou femme" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Boubou Femme</div><div class="text-xs tracking-wider" style="color:#B5A898">Mousseline dorée</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="ceremonie" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1563178406-4cdc2923acbc?w=400&q=80" alt="Baptême tenue" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Tenue de Baptême</div><div class="text-xs tracking-wider" style="color:#B5A898">Famille assortie</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="kaftan" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1618553001655-90b0d756b40c?w=400&q=80" alt="Kaftan homme" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Kaftan Homme</div><div class="text-xs tracking-wider" style="color:#B5A898">Bazin bleu roi</div></div>
+        </div>
+      </div>
+
+      <div class="gallery-item rounded-2xl" data-cat="moderne" style="height:270px;">
+        <img src="https://images.unsplash.com/photo-1588701177520-1c9d876e8f49?w=400&q=80" alt="Ensemble moderne" loading="lazy" style="height:100%">
+        <div class="gallery-overlay">
+          <div><div class="font-serif text-sm" style="color:#F7F0E6">Ensemble Moderne</div><div class="text-xs tracking-wider" style="color:#B5A898">Wax premium</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="text-center mt-10 reveal">
+      <a href="#rendez-vous" class="btn-outline px-8 py-3 rounded-full text-xs tracking-widest uppercase inline-block">
+        Créer votre modèle sur mesure
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ SERVICES ═══════════════════ -->
+<section id="services" class="py-24 relative z-10" style="background:#fff;">
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="text-center mb-14 reveal">
+      <div class="gold-ornament mb-4">CE QUE NOUS FAISONS</div>
+      <h2 class="font-serif text-5xl font-light mb-3">Nos Prestations</h2>
+      <p class="text-sm max-w-md mx-auto leading-relaxed" style="color:#8C7B6B">
+        De la consultation à la livraison — chaque étape soignée à la perfection.
+      </p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <div class="service-card rounded-2xl p-7 reveal">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-ruler" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Prise de Mesures</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Séance de mesures complète et enregistrement dans notre fichier client. Un seul passage suffit pour toutes vos commandes futures.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Sur RDV → </div>
+      </div>
+
+      <div class="service-card rounded-2xl p-7 reveal" style="transition-delay:.07s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-scissors" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Confection Sur Mesure</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Boubous, kaftans, robes de cérémonie réalisés dans votre tissu ou le nôtre. Toutes morphologies, toutes tailles.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Toutes tailles → </div>
+      </div>
+
+      <div class="service-card rounded-2xl p-7 reveal" style="transition-delay:.14s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-people-group" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Tenues de Groupe</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Familles assorties, groupes de mariage, baptêmes — tarifs préférentiels à partir de 5 tenues.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Devis groupé → </div>
+      </div>
+
+      <div class="service-card rounded-2xl p-7 reveal" style="transition-delay:.21s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Broderie &amp; Finitions</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Broderies main, appliqués, perlages — chaque détail sublimé par nos artisans locaux.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Artisanat local → </div>
+      </div>
+
+      <div class="service-card rounded-2xl p-7 reveal" style="transition-delay:.28s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-shirt" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Retouches</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Retouches de tenues existantes, transformations et modernisations de vêtements traditionnels.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Express possible → </div>
+      </div>
+
+      <div class="service-card rounded-2xl p-7 reveal" style="transition-delay:.35s">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
+             style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.25);">
+          <i class="fa-solid fa-truck-fast" style="color:#C9A96E"></i>
+        </div>
+        <h3 class="font-serif text-2xl font-light mb-2">Livraison</h3>
+        <p class="text-sm leading-relaxed" style="color:#8C7B6B">Livraison disponible à Dakar et environs. Commande en ligne pour la diaspora.</p>
+        <div class="mt-4 text-xs tracking-widest uppercase" style="color:#C9A96E">Dakar &amp; diaspora → </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ MESURES CTA ═══════════════════ -->
+<section class="py-20 relative z-10 wax-bg">
+  <div class="max-w-4xl mx-auto px-6 text-center reveal">
+    <div class="gold-ornament mb-5">VOS MESURES EN SÉCURITÉ</div>
+    <h2 class="font-serif text-4xl font-light mb-4" style="color:#1A1209">
+      Enregistrez vos mesures <em style="color:#C9A96E">une fois</em>,<br>soyez habillé·e parfaitement toujours
+    </h2>
+    <p class="text-sm max-w-lg mx-auto leading-relaxed mb-8" style="color:#8C7B6B">
+      Lors de votre rendez-vous, toutes vos mensurations sont sauvegardées. Plus besoin de revenir à chaque commande — nous vous habillons à distance, même depuis la diaspora.
+    </p>
+    <button onclick="document.getElementById('modal-mesures').classList.add('open')"
+            class="btn-or px-8 py-4 rounded-full text-xs tracking-widest uppercase">
+      <i class="fa-solid fa-ruler mr-2"></i>Voir le formulaire de mesures
+    </button>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ RENDEZ-VOUS ═══════════════════ -->
+<section id="rendez-vous" class="py-24 relative z-10" style="background:#fff;">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="grid lg:grid-cols-2 gap-14 items-start">
+
+      <!-- Info -->
+      <div class="reveal">
+        <div class="gold-ornament mb-5">RÉSERVATION</div>
+        <h2 class="font-serif text-5xl font-light mb-4 leading-tight">
+          Prenez<br><em style="color:#C9A96E">rendez-vous</em>
+        </h2>
+        <p class="text-sm leading-relaxed mb-8" style="color:#8C7B6B">
+          Premier rendez-vous gratuit. Venez avec vos inspirations — photos, tissus, idées. Nous construisons ensemble votre tenue idéale.
+        </p>
+        <div class="space-y-5">
+          <div class="flex items-start gap-4">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-semibold mt-0.5" style="background:#C9A96E;color:#F7F0E6">1</div>
+            <div>
+              <div class="font-medium text-sm mb-0.5">Consultation &amp; inspiration</div>
+              <div class="text-xs leading-relaxed" style="color:#8C7B6B">Nous discutons de votre vision, occasion, tissu souhaité.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-semibold mt-0.5" style="background:#C9A96E;color:#F7F0E6">2</div>
+            <div>
+              <div class="font-medium text-sm mb-0.5">Prise de mesures complète</div>
+              <div class="text-xs leading-relaxed" style="color:#8C7B6B">Mensurations enregistrées dans notre système pour toutes vos commandes futures.</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-4">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-semibold mt-0.5" style="background:#C9A96E;color:#F7F0E6">3</div>
+            <div>
+              <div class="font-medium text-sm mb-0.5">Confection &amp; livraison</div>
+              <div class="text-xs leading-relaxed" style="color:#8C7B6B">Délai selon complexité. Essayage intermédiaire possible.</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-8 pt-8 space-y-3" style="border-top:1px solid rgba(201,169,110,0.2)">
+          <div class="flex items-center gap-3">
+            <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
+            <a href="https://wa.me/221XXXXXXXXX" class="text-sm font-medium hover:text-or transition">WhatsApp : +221 XX XXX XX XX</a>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-phone text-sm" style="color:#C9A96E"></i>
+            <a href="tel:+221XXXXXXXXX" class="text-sm font-medium hover:text-or transition">+221 XX XXX XX XX</a>
+          </div>
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-envelope text-sm" style="color:#C9A96E"></i>
+            <a href="mailto:votre@email.com" class="text-sm font-medium hover:text-or transition">votre@email.com</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <div class="reveal" style="transition-delay:.1s">
+        <form id="rdv-form" action="traiter_rdv.php" method="POST"
+              class="rounded-2xl p-7 space-y-5"
+              style="background:#F7F0E6;border:1px solid rgba(201,169,110,0.2);">
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Prénom &amp; Nom *</label>
+              <input type="text" name="nom" required placeholder="Aminata Diallo"
+                     class="form-field w-full rounded-xl px-4 py-3 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Téléphone *</label>
+              <input type="tel" name="telephone" required placeholder="7X XXX XX XX"
+                     class="form-field w-full rounded-xl px-4 py-3 text-sm">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Type de prestation *</label>
+            <select name="type_prestation" required
+                    class="form-field w-full rounded-xl px-4 py-3 text-sm cursor-pointer appearance-none">
+              <option value="" disabled selected>Choisissez…</option>
+              <option value="Consultation + prise de mesures">Consultation + prise de mesures</option>
+              <option value="Grand Boubou">Grand Boubou</option>
+              <option value="Kaftan / Abaya">Kaftan / Abaya</option>
+              <option value="Tenue de mariage">Tenue de mariage</option>
+              <option value="Tenue de baptême">Tenue de baptême</option>
+              <option value="Tenue de cérémonie">Tenue de cérémonie</option>
+              <option value="Retouche / Ajustement">Retouche / Ajustement</option>
+              <option value="Commande groupée famille">Commande groupée famille</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Date souhaitée *</label>
+              <input type="date" name="date_rdv" required
+                     class="form-field w-full rounded-xl px-4 py-3 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Heure préférée</label>
+              <select name="heure_pref" class="form-field w-full rounded-xl px-4 py-3 text-sm cursor-pointer appearance-none">
+                <option value="">Sans préférence</option>
+                <option value="Matin 8h-12h">Matin 8h – 12h</option>
+                <option value="Après-midi 13h-17h">Après-midi 13h – 17h</option>
+                <option value="Soir 17h-20h">Soir 17h – 20h</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs tracking-widest uppercase mb-1.5" style="color:#8C7B6B">Tissu / Inspiration</label>
+            <textarea name="message" rows="3"
+                      placeholder="Ex : bazin rose poudré, style inspiré de la photo ci-jointe, pour un mariage le 15 mars…"
+                      class="form-field w-full rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+          </div>
+
+          <button type="submit" class="btn-or w-full py-4 rounded-xl text-xs tracking-widest uppercase">
+            <i class="fa-regular fa-calendar-check mr-2"></i>Réserver mon rendez-vous
+          </button>
+
+          <p class="text-center text-xs" style="color:#8C7B6B">
+            Premier rendez-vous <strong>gratuit</strong> · Confirmation SMS / WhatsApp
+          </p>
+        </form>
+        <div id="notif" class="hidden mt-4 px-5 py-4 rounded-xl text-sm"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ TÉMOIGNAGES ═══════════════════ -->
+<section class="py-20 relative z-10 wax-bg">
+  <div class="max-w-5xl mx-auto px-6">
+    <div class="text-center mb-12 reveal">
+      <div class="gold-ornament mb-4">ILS TÉMOIGNENT</div>
+      <h2 class="font-serif text-4xl font-light">Ce que disent nos clients</h2>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <div class="rounded-2xl p-6 reveal" style="background:#fff;border:1px solid rgba(201,169,110,0.15);">
+        <div class="flex gap-1 mb-3">
+          <i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i>
+        </div>
+        <p class="font-serif text-sm leading-relaxed italic mb-4" style="color:#8C7B6B">"Mon boubou de mariage était absolument magnifique. Chaque détail brodé à la main, ajustement parfait."</p>
+        <div class="text-xs font-medium" style="color:#1A1209">Marième S. — Dakar</div>
+      </div>
+      <div class="rounded-2xl p-6 reveal" style="transition-delay:.08s;background:#fff;border:1px solid rgba(201,169,110,0.15);">
+        <div class="flex gap-1 mb-3">
+          <i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i>
+        </div>
+        <p class="font-serif text-sm leading-relaxed italic mb-4" style="color:#8C7B6B">"J'ai commandé des tenues assorties pour toute ma famille. Délai respecté, qualité exceptionnelle."</p>
+        <div class="text-xs font-medium" style="color:#1A1209">Ousmane D. — Thiès</div>
+      </div>
+      <div class="rounded-2xl p-6 reveal" style="transition-delay:.16s;background:#fff;border:1px solid rgba(201,169,110,0.15);">
+        <div class="flex gap-1 mb-3">
+          <i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i><i class="fa-solid fa-star text-xs" style="color:#C9A96E"></i>
+        </div>
+        <p class="font-serif text-sm leading-relaxed italic mb-4" style="color:#8C7B6B">"Mes mesures sont enregistrées depuis 2 ans. Je commande depuis Paris et je suis toujours parfaitement habillée."</p>
+        <div class="text-xs font-medium" style="color:#1A1209">Fatou B. — Paris (diaspora)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer id="contact" class="pt-16 pb-8 relative z-10" style="background:#1A1209;">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid sm:grid-cols-3 gap-10 mb-12">
+
+      <div>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-8 h-8 rounded-full flex items-center justify-center" style="background:linear-gradient(135deg,#C9A96E,#A8844A);">
+            <i class="fa-solid fa-scissors text-xs" style="color:#F7F0E6"></i>
+          </div>
+          <span class="font-serif text-lg tracking-wider" style="color:#F7F0E6">ATELIER COUTURE</span>
+        </div>
+        <p class="text-sm leading-relaxed" style="color:#4A3D2E">Art vestimentaire sénégalais. Chaque tenue est une œuvre, chaque client une histoire unique.</p>
+        <div class="flex gap-3 mt-5">
+          <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center text-xs transition hover:opacity-80" style="background:rgba(201,169,110,0.12);color:#C9A96E;border:1px solid rgba(201,169,110,0.2)"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center text-xs transition hover:opacity-80" style="background:rgba(201,169,110,0.12);color:#C9A96E;border:1px solid rgba(201,169,110,0.2)"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="w-8 h-8 rounded-full flex items-center justify-center text-xs transition hover:opacity-80" style="background:rgba(201,169,110,0.12);color:#C9A96E;border:1px solid rgba(201,169,110,0.2)"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="text-xs tracking-widest uppercase mb-4" style="color:#C9A96E">Prestations</div>
+        <ul class="space-y-2 text-sm" style="color:#4A3D2E">
+          <li>✦ Grand Boubou</li><li>✦ Kaftan &amp; Abaya</li>
+          <li>✦ Tenues de mariage</li><li>✦ Tenues de baptême</li>
+          <li>✦ Broderie &amp; finitions</li><li>✦ Retouches</li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="text-xs tracking-widest uppercase mb-4" style="color:#C9A96E">Contact</div>
+        <ul class="space-y-3 text-sm" style="color:#4A3D2E">
+          <li><i class="fa-solid fa-phone mr-2" style="color:#C9A96E"></i><a href="tel:+221XXXXXXXXX" class="hover:text-ivoire transition" style="--c:#F7F0E6">+221 XX XXX XX XX</a></li>
+          <li><i class="fa-brands fa-whatsapp mr-2 text-green-400"></i><a href="https://wa.me/221XXXXXXXXX" class="hover:text-ivoire transition">WhatsApp disponible</a></li>
+          <li><i class="fa-solid fa-envelope mr-2" style="color:#C9A96E"></i><a href="mailto:votre@email.com" class="hover:text-ivoire transition break-all">votre@email.com</a></li>
+          <li><i class="fa-solid fa-location-dot mr-2" style="color:#C9A96E"></i>Dakar, Sénégal</li>
+          <li><i class="fa-regular fa-clock mr-2" style="color:#C9A96E"></i>Lun – Sam · 8h – 20h</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs pt-6" style="border-top:1px solid rgba(201,169,110,0.12);color:#2E2010">
+      <span>© 2024 Atelier Couture — Tous droits réservés</span>
+      <span>Créé avec <i class="fa-solid fa-heart mx-1" style="color:#C9A96E"></i> pour la mode sénégalaise</span>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════ MODAL MESURES ═══════════════════ -->
+<div id="modal-mesures">
+  <div class="modal-box relative">
+    <button onclick="document.getElementById('modal-mesures').classList.remove('open')"
+            class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center transition"
+            style="background:rgba(201,169,110,0.1);color:#8C7B6B">
+      <i class="fa-solid fa-xmark text-sm"></i>
+    </button>
+
+    <div class="gold-ornament mb-4">FICHE DE MESURES</div>
+    <h3 class="font-serif text-3xl font-light mb-2">Enregistrer vos mesures</h3>
+    <p class="text-xs mb-6" style="color:#8C7B6B">Toutes les mesures sont en centimètres (cm). Remplissez uniquement ce que vous connaissez.</p>
+
+    <form id="mesures-form" action="enregistrer_mesures.php" method="POST" class="space-y-4">
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="text-xs tracking-widest uppercase block mb-1" style="color:#8C7B6B">Nom client *</label>
+          <input type="text" name="nom" required placeholder="Nom complet" class="form-field w-full rounded-xl px-4 py-2.5 text-sm">
+        </div>
+        <div>
+          <label class="text-xs tracking-widest uppercase block mb-1" style="color:#8C7B6B">Téléphone *</label>
+          <input type="tel" name="telephone" required placeholder="7X XXX XX XX" class="form-field w-full rounded-xl px-4 py-2.5 text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="text-xs tracking-widest uppercase block mb-1" style="color:#8C7B6B">Genre</label>
+        <select name="genre" class="form-field w-full rounded-xl px-4 py-2.5 text-sm cursor-pointer appearance-none">
+          <option value="Femme">Femme</option>
+          <option value="Homme">Homme</option>
+          <option value="Enfant">Enfant</option>
+        </select>
+      </div>
+
+      <!-- Mesures -->
+      <div class="rounded-xl p-4 space-y-3" style="background:rgba(201,169,110,0.06);border:1px solid rgba(201,169,110,0.15);">
+        <div class="text-xs tracking-widest uppercase font-medium" style="color:#C9A96E">
+          <i class="fa-solid fa-ruler mr-1"></i> Mesures du corps (cm)
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Tour de poitrine</label><input type="number" name="poitrine" min="0" max="200" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Tour de taille</label><input type="number" name="taille" min="0" max="200" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Tour de hanches</label><input type="number" name="hanches" min="0" max="200" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Longueur boubou</label><input type="number" name="longueur_boubou" min="0" max="250" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Largeur épaules</label><input type="number" name="epaules" min="0" max="100" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Longueur manche</label><input type="number" name="manche" min="0" max="100" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Tour de bras</label><input type="number" name="bras" min="0" max="100" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Tour de cou</label><input type="number" name="cou" min="0" max="60" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+          <div><label class="text-xs block mb-1" style="color:#8C7B6B">Hauteur totale</label><input type="number" name="hauteur" min="0" max="250" step="0.5" placeholder="cm" class="form-field w-full rounded-lg px-3 py-2 text-sm"></div>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-xs tracking-widest uppercase block mb-1" style="color:#8C7B6B">Notes du tailleur</label>
+        <textarea name="notes" rows="2" placeholder="Particularités morphologiques, préférences d'ajustement…" class="form-field w-full rounded-xl px-4 py-2.5 text-sm resize-none"></textarea>
+      </div>
+
+      <div class="flex gap-3">
+        <button type="submit" class="btn-or flex-1 py-3 rounded-xl text-xs tracking-widest uppercase">
+          <i class="fa-solid fa-floppy-disk mr-2"></i>Enregistrer les mesures
+        </button>
+        <button type="button" onclick="document.getElementById('modal-mesures').classList.remove('open')"
+                class="btn-outline px-5 py-3 rounded-xl text-xs tracking-widest uppercase">Annuler</button>
+      </div>
+    </form>
+    <div id="notif-mesures" class="hidden mt-3 px-4 py-3 rounded-xl text-sm"></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════ JAVASCRIPT ═══════════════════ -->
+<script>
+  // Navbar scroll
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+
+  // Mobile menu
+  const menuBtn   = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  menuBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('open');
+    const ic = menuBtn.querySelector('i');
+    ic.classList.toggle('fa-bars'); ic.classList.toggle('fa-xmark');
+  });
+  mobileMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    menuBtn.querySelector('i').className = 'fa-solid fa-bars';
+  }));
+
+  // Scroll reveal
+  new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  }, { threshold: 0.1 }).observe && document.querySelectorAll('.reveal').forEach(el => {
+    new IntersectionObserver((entries, obs) => {
+      entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }});
+    }, { threshold: 0.1 }).observe(el);
+  });
+
+  // Min date
+  document.querySelectorAll('input[type="date"]').forEach(d => d.min = new Date().toISOString().split('T')[0]);
+
+  // Gallery filter
+  function filterGallery(cat, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('#gallery-grid .gallery-item').forEach(item => {
+      item.style.display = (cat === 'all' || item.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  // Notification helper
+  function showNotif(id, msg, ok) {
+    const n = document.getElementById(id);
+    n.textContent = msg;
+    n.style.background = ok ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)';
+    n.style.border     = ok ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(239,68,68,0.3)';
+    n.style.color      = ok ? '#166534' : '#991B1B';
+    n.classList.remove('hidden');
+    setTimeout(() => n.classList.add('hidden'), 7000);
+  }
+
+  // RDV form
+  document.getElementById('rdv-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Envoi…';
+    const fd = new FormData(e.target);
+    try { await fetch('traiter_rdv.php', { method:'POST', body:fd }); } catch(err) { console.warn(err); }
+    // Formspree — remplacez YOUR_FORMSPREE_ID
+    try { await fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', { method:'POST', body:fd, headers:{'Accept':'application/json'} }); } catch(err) {}
+    showNotif('notif', '✦ Rendez-vous demandé avec succès ! Nous vous confirmons très bientôt.', true);
+    e.target.reset();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-regular fa-calendar-check mr-2"></i>Réserver mon rendez-vous';
+  });
+
+  // Mesures form
+  document.getElementById('mesures-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Enregistrement…';
+    const fd = new FormData(e.target);
+    try {
+      const r = await fetch('enregistrer_mesures.php', { method:'POST', body:fd });
+      const d = await r.json();
+      showNotif('notif-mesures', d.success ? '✦ Mesures enregistrées !' : d.message, d.success);
+      if(d.success){ e.target.reset(); setTimeout(() => document.getElementById('modal-mesures').classList.remove('open'), 2500); }
+    } catch(err) { showNotif('notif-mesures', 'Erreur réseau. Réessayez.', false); }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Enregistrer les mesures';
+  });
+
+  // Modal backdrop close
+  document.getElementById('modal-mesures').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+</script>
+</body>
+</html>

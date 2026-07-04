@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PMD Services – Atelier Mécanique | Dougar, Diamniadio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              orange: '#F97316',
+              orangeDeep: '#EA580C',
+              dark: '#0A0A0A',
+              darkCard: '#141414',
+              darkBorder: '#1F1F1F',
+              gray: '#6B7280',
+              lightGray: '#9CA3AF',
+              white: '#F9FAFB',
+            }
+          },
+          fontFamily: {
+            display: ['Bebas Neue', 'sans-serif'],
+            body: ['Barlow', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { scroll-behavior: smooth; }
+
+    body {
+      background-color: #0A0A0A;
+      color: #F9FAFB;
+      font-family: 'Barlow', sans-serif;
+    }
+
+    /* ── NOISE TEXTURE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+    }
+    #navbar.scrolled {
+      background: rgba(10, 10, 10, 0.97) !important;
+      box-shadow: 0 1px 0 #1F1F1F;
+    }
+
+    /* ── HERO ── */
+    .hero-bg {
+      background:
+        linear-gradient(135deg, rgba(249,115,22,0.12) 0%, transparent 50%),
+        linear-gradient(to bottom, rgba(0,0,0,0) 60%, #0A0A0A 100%),
+        url('https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=1600&q=80') center/cover no-repeat;
+    }
+
+    /* ── DIAGONAL ACCENT ── */
+    .hero-diagonal {
+      clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
+    }
+
+    /* ── ORANGE LINE ── */
+    .orange-line {
+      display: inline-block;
+      width: 48px;
+      height: 3px;
+      background: #F97316;
+      margin-bottom: 12px;
+      border-radius: 2px;
+    }
+
+    /* ── SERVICE CARD ── */
+    .service-card {
+      background: #141414;
+      border: 1px solid #1F1F1F;
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .service-card:hover {
+      transform: translateY(-6px);
+      border-color: #F97316;
+      box-shadow: 0 0 32px rgba(249,115,22,0.15);
+    }
+    .service-card .icon-wrap {
+      width: 56px; height: 56px;
+      background: rgba(249,115,22,0.1);
+      border: 1px solid rgba(249,115,22,0.3);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s ease;
+    }
+    .service-card:hover .icon-wrap {
+      background: rgba(249,115,22,0.22);
+    }
+
+    /* ── FORM ── */
+    .form-input {
+      background: #141414;
+      border: 1px solid #1F1F1F;
+      color: #F9FAFB;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: #F97316;
+      box-shadow: 0 0 0 3px rgba(249,115,22,0.12);
+    }
+    .form-input::placeholder { color: #4B5563; }
+
+    /* ── CTA BUTTON ── */
+    .btn-primary {
+      background: linear-gradient(135deg, #F97316, #EA580C);
+      color: #fff;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(249,115,22,0.35);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── MOBILE MENU ── */
+    #mobile-menu {
+      display: none;
+    }
+    #mobile-menu.open {
+      display: flex;
+    }
+
+    /* ── GRID PATTERN SECTION BG ── */
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* ── STAT BADGE ── */
+    .stat-badge {
+      border: 1px solid #1F1F1F;
+      background: #141414;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #0A0A0A; }
+    ::-webkit-scrollbar-thumb { background: #F97316; border-radius: 10px; }
+
+    /* ── NOTIFICATION ── */
+    #notification {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+  </style>
+</head>
+
+<body class="relative overflow-x-hidden">
+
+  <!-- ══════════════════════════════════════════
+       NAVBAR
+  ══════════════════════════════════════════ -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#hero" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center"
+             style="background: linear-gradient(135deg,#F97316,#EA580C);">
+          <i class="fa-solid fa-wrench text-white text-sm"></i>
+        </div>
+        <div>
+          <span class="font-display text-2xl tracking-widest text-white">PMD</span>
+          <span class="font-display text-2xl tracking-widest" style="color:#F97316;">Services</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <ul class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide text-gray-400">
+        <li><a href="#services" class="hover:text-white transition-colors">Services</a></li>
+        <li><a href="#rendez-vous" class="hover:text-white transition-colors">Rendez-vous</a></li>
+        <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+        <li>
+          <a href="#rendez-vous"
+             class="btn-primary px-5 py-2 rounded-lg text-sm">
+            Prendre RDV
+          </a>
+        </li>
+      </ul>
+
+      <!-- Hamburger -->
+      <button id="menu-btn" class="md:hidden text-white text-xl focus:outline-none" aria-label="Menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu"
+         class="open:flex flex-col md:hidden mt-4 gap-4 px-2 py-4 rounded-xl"
+         style="background:#141414;border:1px solid #1F1F1F;">
+      <a href="#services" class="text-gray-300 hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition">Services</a>
+      <a href="#rendez-vous" class="text-gray-300 hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition">Rendez-vous</a>
+      <a href="#contact" class="text-gray-300 hover:text-white py-2 px-4 rounded-lg hover:bg-white/5 transition">Contact</a>
+      <a href="#rendez-vous" class="btn-primary text-center py-3 rounded-lg">Prendre RDV</a>
+    </div>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════ -->
+  <section id="hero"
+           class="hero-bg hero-diagonal relative min-h-screen flex items-center pt-20 pb-32">
+    <div class="max-w-6xl mx-auto px-6 w-full relative z-10">
+
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 text-xs font-medium tracking-wider text-orange-400 reveal"
+           style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);">
+        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+        ATELIER MÉCANIQUE · DOUGAR, DIAMNIADIO
+      </div>
+
+      <!-- Headline -->
+      <h1 class="font-display text-6xl sm:text-7xl md:text-8xl leading-none mb-4 reveal" style="animation-delay:0.1s">
+        VOTRE VOITURE<br>
+        <span style="color:#F97316">ENTRE DE</span><br>
+        BONNES MAINS
+      </h1>
+
+      <p class="max-w-lg text-gray-400 text-lg mb-10 reveal" style="animation-delay:0.2s">
+        Diagnostic, mécanique générale, climatisation & programmation électronique. Un service de confiance, à portée de main.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex flex-wrap gap-4 reveal" style="animation-delay:0.3s">
+        <a href="#rendez-vous" class="btn-primary px-8 py-4 rounded-xl text-base">
+          <i class="fa-regular fa-calendar-check mr-2"></i>Prendre un rendez-vous
+        </a>
+        <a href="#services"
+           class="px-8 py-4 rounded-xl text-base font-semibold text-white transition hover:text-orange-400"
+           style="border:1px solid #1F1F1F;background:#141414;">
+          Voir nos services <i class="fa-solid fa-arrow-down ml-2"></i>
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="flex flex-wrap gap-4 mt-14 reveal" style="animation-delay:0.4s">
+        <div class="stat-badge px-5 py-3 rounded-xl flex items-center gap-3">
+          <i class="fa-solid fa-star text-orange-400"></i>
+          <div>
+            <div class="text-lg font-bold text-white">10+</div>
+            <div class="text-xs text-gray-500">Ans d'expérience</div>
+          </div>
+        </div>
+        <div class="stat-badge px-5 py-3 rounded-xl flex items-center gap-3">
+          <i class="fa-solid fa-users text-orange-400"></i>
+          <div>
+            <div class="text-lg font-bold text-white">500+</div>
+            <div class="text-xs text-gray-500">Clients satisfaits</div>
+          </div>
+        </div>
+        <div class="stat-badge px-5 py-3 rounded-xl flex items-center gap-3">
+          <i class="fa-solid fa-shield-halved text-orange-400"></i>
+          <div>
+            <div class="text-lg font-bold text-white">Certifié</div>
+            <div class="text-xs text-gray-500">Techniciens qualifiés</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SERVICES
+  ══════════════════════════════════════════ -->
+  <section id="services" class="py-24 grid-bg relative z-10">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <!-- Section Header -->
+      <div class="mb-14 reveal">
+        <div class="orange-line"></div>
+        <h2 class="font-display text-5xl tracking-wide mb-3">NOS SERVICES</h2>
+        <p class="text-gray-400 max-w-md">
+          Tout ce dont votre véhicule a besoin, sous un même toit.
+        </p>
+      </div>
+
+      <!-- Cards Grid -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+        <!-- Card 1 -->
+        <div class="service-card rounded-2xl p-6 reveal">
+          <div class="icon-wrap mb-5">
+            <i class="fa-solid fa-screwdriver-wrench text-orange-400 text-xl"></i>
+          </div>
+          <h3 class="font-display text-2xl tracking-wide mb-2">Réparation Mécanique</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Moteur, transmission, freins, suspension — prise en charge complète de vos pannes mécaniques.
+          </p>
+          <div class="mt-4 text-orange-400 text-sm font-medium">
+            Diagnostic inclus <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="service-card rounded-2xl p-6 reveal" style="transition-delay:0.08s">
+          <div class="icon-wrap mb-5">
+            <i class="fa-solid fa-snowflake text-orange-400 text-xl"></i>
+          </div>
+          <h3 class="font-display text-2xl tracking-wide mb-2">Climatisation</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Recharge de gaz, détection de fuites, remplacement de compresseur pour rouler au frais.
+          </p>
+          <div class="mt-4 text-orange-400 text-sm font-medium">
+            Recharge & entretien <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="service-card rounded-2xl p-6 reveal" style="transition-delay:0.16s">
+          <div class="icon-wrap mb-5">
+            <i class="fa-solid fa-microchip text-orange-400 text-xl"></i>
+          </div>
+          <h3 class="font-display text-2xl tracking-wide mb-2">Programmation Électronique</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Codage d'injecteurs, clés, calculateurs et modules électroniques toutes marques.
+          </p>
+          <div class="mt-4 text-orange-400 text-sm font-medium">
+            Toutes marques <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="service-card rounded-2xl p-6 reveal" style="transition-delay:0.24s">
+          <div class="icon-wrap mb-5">
+            <i class="fa-solid fa-laptop-code text-orange-400 text-xl"></i>
+          </div>
+          <h3 class="font-display text-2xl tracking-wide mb-2">Diagnostic Scanner</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">
+            Lecture et effacement des codes erreurs OBD2, analyse complète des systèmes du véhicule.
+          </p>
+          <div class="mt-4 text-orange-400 text-sm font-medium">
+            Rapport détaillé <i class="fa-solid fa-arrow-right ml-1 text-xs"></i>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       WHY US — MINI BANNER
+  ══════════════════════════════════════════ -->
+  <section class="py-14 relative z-10" style="background:linear-gradient(90deg,rgba(249,115,22,0.08),rgba(249,115,22,0.03));">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid sm:grid-cols-3 gap-8 text-center">
+        <div class="reveal">
+          <i class="fa-solid fa-bolt text-3xl text-orange-400 mb-3"></i>
+          <div class="font-display text-xl tracking-wide">Intervention Rapide</div>
+          <p class="text-gray-500 text-sm mt-1">Prise en charge le jour même selon disponibilité</p>
+        </div>
+        <div class="reveal" style="transition-delay:0.1s">
+          <i class="fa-solid fa-hand-holding-dollar text-3xl text-orange-400 mb-3"></i>
+          <div class="font-display text-xl tracking-wide">Prix Transparents</div>
+          <p class="text-gray-500 text-sm mt-1">Devis gratuit avant tout travail</p>
+        </div>
+        <div class="reveal" style="transition-delay:0.2s">
+          <i class="fa-solid fa-medal text-3xl text-orange-400 mb-3"></i>
+          <div class="font-display text-xl tracking-wide">Qualité Garantie</div>
+          <p class="text-gray-500 text-sm mt-1">Pièces d'origine et techniciens certifiés</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       RENDEZ-VOUS
+  ══════════════════════════════════════════ -->
+  <section id="rendez-vous" class="py-24 relative z-10">
+    <div class="max-w-5xl mx-auto px-6">
+
+      <div class="grid lg:grid-cols-2 gap-12 items-start">
+
+        <!-- Left Info -->
+        <div class="reveal">
+          <div class="orange-line"></div>
+          <h2 class="font-display text-5xl tracking-wide mb-4">PRENDRE UN RENDEZ-VOUS</h2>
+          <p class="text-gray-400 mb-8 leading-relaxed">
+            Remplissez le formulaire ci-contre. Nous vous confirmons votre rendez-vous dans les plus brefs délais.
+          </p>
+          <div class="space-y-5">
+            <div class="flex items-center gap-4">
+              <div class="icon-wrap flex-shrink-0" style="width:44px;height:44px;">
+                <i class="fa-solid fa-phone text-orange-400"></i>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-0.5">TÉLÉPHONE</div>
+                <a href="tel:+221782544938" class="font-semibold text-white hover:text-orange-400 transition">78 254 49 38</a>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="icon-wrap flex-shrink-0" style="width:44px;height:44px;">
+                <i class="fa-solid fa-envelope text-orange-400"></i>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-0.5">EMAIL</div>
+                <a href="mailto:papamamadoudiouf911@gmail.com" class="font-semibold text-white hover:text-orange-400 transition break-all">papamamadoudiouf911@gmail.com</a>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="icon-wrap flex-shrink-0" style="width:44px;height:44px;">
+                <i class="fa-solid fa-location-dot text-orange-400"></i>
+              </div>
+              <div>
+                <div class="text-xs text-gray-500 mb-0.5">ADRESSE</div>
+                <span class="font-semibold text-white">Dougar, Diamniadio, Sénégal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form -->
+        <div class="reveal" style="transition-delay:0.1s">
+          <!--
+            DOUBLE SOUMISSION : Formspree pour l'email + traiter_demande.php pour la BD.
+            Remplacez YOUR_FORMSPREE_ID par votre vrai ID Formspree.
+            Le formulaire envoie d'abord vers PHP ; le JS envoie aussi vers Formspree.
+          -->
+          <form id="rdv-form"
+                action="traiter_demande.php"
+                method="POST"
+                class="rounded-2xl p-7 space-y-5"
+                style="background:#141414;border:1px solid #1F1F1F;">
+
+            <div class="grid sm:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-xs text-gray-500 mb-1.5 tracking-wider uppercase">Nom complet *</label>
+                <input type="text" name="nom" required placeholder="Votre nom"
+                       class="form-input w-full rounded-xl px-4 py-3 text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-1.5 tracking-wider uppercase">Téléphone *</label>
+                <input type="tel" name="telephone" required placeholder="7X XXX XX XX"
+                       class="form-input w-full rounded-xl px-4 py-3 text-sm" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-500 mb-1.5 tracking-wider uppercase">Type de service *</label>
+              <select name="type_service" required
+                      class="form-input w-full rounded-xl px-4 py-3 text-sm appearance-none cursor-pointer">
+                <option value="" disabled selected>Choisissez un service…</option>
+                <option value="Réparation mécanique">Réparation mécanique</option>
+                <option value="Climatisation">Climatisation</option>
+                <option value="Programmation électronique">Programmation électronique</option>
+                <option value="Diagnostic scanner">Diagnostic scanner</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-500 mb-1.5 tracking-wider uppercase">Date souhaitée *</label>
+              <input type="date" name="date_rdv" required
+                     class="form-input w-full rounded-xl px-4 py-3 text-sm" />
+            </div>
+
+            <div>
+              <label class="block text-xs text-gray-500 mb-1.5 tracking-wider uppercase">Message</label>
+              <textarea name="message" rows="3" placeholder="Décrivez brièvement le problème ou vos besoins…"
+                        class="form-input w-full rounded-xl px-4 py-3 text-sm resize-none"></textarea>
+            </div>
+
+            <button type="submit" class="btn-primary w-full py-4 rounded-xl text-sm tracking-wider">
+              <i class="fa-regular fa-calendar-check mr-2"></i>CONFIRMER LE RENDEZ-VOUS
+            </button>
+          </form>
+
+          <!-- Notification toast -->
+          <div id="notification"
+               class="hidden mt-4 px-5 py-4 rounded-xl text-sm font-medium"
+               role="alert"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       FOOTER / CONTACT
+  ══════════════════════════════════════════ -->
+  <footer id="contact"
+          class="pt-16 pb-8 relative z-10"
+          style="background:#0D0D0D;border-top:1px solid #1F1F1F;">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid sm:grid-cols-3 gap-10 mb-12">
+
+        <!-- Brand -->
+        <div>
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center"
+                 style="background:linear-gradient(135deg,#F97316,#EA580C);">
+              <i class="fa-solid fa-wrench text-white text-xs"></i>
+            </div>
+            <span class="font-display text-2xl tracking-widest">PMD<span style="color:#F97316">Services</span></span>
+          </div>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            Votre atelier de mécanique de confiance à Dougar, Diamniadio. Expertise, rapidité et transparence.
+          </p>
+        </div>
+
+        <!-- Services rapides -->
+        <div>
+          <div class="text-xs text-gray-500 tracking-widest uppercase mb-4">Services</div>
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li><i class="fa-solid fa-screwdriver-wrench text-orange-400 mr-2 text-xs"></i>Réparation mécanique</li>
+            <li><i class="fa-solid fa-snowflake text-orange-400 mr-2 text-xs"></i>Climatisation</li>
+            <li><i class="fa-solid fa-microchip text-orange-400 mr-2 text-xs"></i>Programmation électronique</li>
+            <li><i class="fa-solid fa-laptop-code text-orange-400 mr-2 text-xs"></i>Diagnostic scanner</li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <div class="text-xs text-gray-500 tracking-widest uppercase mb-4">Contact</div>
+          <ul class="space-y-3 text-sm text-gray-400">
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-phone text-orange-400 mt-0.5"></i>
+              <a href="tel:+221782544938" class="hover:text-white transition">78 254 49 38</a>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-envelope text-orange-400 mt-0.5"></i>
+              <a href="mailto:papamamadoudiouf911@gmail.com" class="hover:text-white transition break-all">
+                papamamadoudiouf911@gmail.com
+              </a>
+            </li>
+            <li class="flex items-start gap-2">
+              <i class="fa-solid fa-location-dot text-orange-400 mt-0.5"></i>
+              <span>Dougar, Diamniadio, Sénégal</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="border-t pt-6 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-600"
+           style="border-color:#1F1F1F;">
+        <span>© 2024 PMD Services. Tous droits réservés.</span>
+        <span>Conçu avec <i class="fa-solid fa-heart text-orange-400 mx-1"></i> pour vous servir</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ══════════════════════════════════════════
+       JAVASCRIPT
+  ══════════════════════════════════════════ -->
+  <script>
+    // ── Navbar scroll effect ──
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    // ── Mobile menu toggle ──
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
+      menuBtn.querySelector('i').classList.toggle('fa-bars');
+      menuBtn.querySelector('i').classList.toggle('fa-xmark');
+    });
+    // Close on link click
+    mobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+        menuBtn.querySelector('i').className = 'fa-solid fa-bars';
+      });
+    });
+
+    // ── Scroll reveal ──
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // ── Set min date for date input ──
+    const dateInput = document.querySelector('input[name="date_rdv"]');
+    if (dateInput) {
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+    }
+
+    // ── Form submission handler ──
+    // Sends to both PHP backend AND Formspree for email notification
+    const form = document.getElementById('rdv-form');
+    const notification = document.getElementById('notification');
+
+    function showNotif(msg, success) {
+      notification.textContent = msg;
+      notification.className = success
+        ? 'mt-4 px-5 py-4 rounded-xl text-sm font-medium'
+        : 'mt-4 px-5 py-4 rounded-xl text-sm font-medium';
+      notification.style.background   = success ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)';
+      notification.style.border       = success ? '1px solid rgba(34,197,94,0.3)' : '1px solid rgba(239,68,68,0.3)';
+      notification.style.color        = success ? '#4ADE80' : '#F87171';
+      notification.classList.remove('hidden');
+      setTimeout(() => notification.classList.add('hidden'), 6000);
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Envoi en cours…';
+
+      const formData = new FormData(form);
+
+      // ── 1. Send to PHP backend ──
+      try {
+        const phpRes = await fetch('traiter_demande.php', {
+          method: 'POST',
+          body: formData
+        });
+        const phpData = await phpRes.json();
+        if (!phpData.success) throw new Error(phpData.message || 'Erreur serveur');
+      } catch (err) {
+        // If PHP fails, still try Formspree
+        console.warn('PHP backend error:', err.message);
+      }
+
+      // ── 2. Also send to Formspree (replace YOUR_FORMSPREE_ID) ──
+      const FORMSPREE_ID = 'YOUR_FORMSPREE_ID'; // ← REMPLACEZ ICI
+      try {
+        await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+          method: 'POST',
+          body: formData,
+          headers: { 'Accept': 'application/json' }
+        });
+      } catch (err) {
+        console.warn('Formspree error:', err.message);
+      }
+
+      showNotif('✅ Votre demande de rendez-vous a été envoyée ! Nous vous contacterons très bientôt.', true);
+      form.reset();
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-regular fa-calendar-check mr-2"></i>CONFIRMER LE RENDEZ-VOUS';
+    });
+  </script>
+
+</body>
+</html>
